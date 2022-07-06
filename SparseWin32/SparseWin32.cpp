@@ -1,7 +1,7 @@
 // SparseWin32.cpp : Defines the entry point for the application.
 //
 
-#include "framework.h"
+#include "pch.h"
 #include "SparseWin32.h"
 #include <appmodel.h>
 
@@ -18,6 +18,10 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+
+using namespace winrt;
+using namespace Windows::Foundation;
+using namespace Windows::ApplicationModel;
 int GetPackageName(WCHAR* package)
 {
     UINT32 length = 0;
@@ -74,7 +78,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         ::Sleep(100); // to avoid 100% CPU load
 #endif
     WCHAR buf[255] = { 0 };
+    winrt::init_apartment();
 
+    
     if (GetPackageName(buf))
     {
         lstrcpyW(szTitle, L"No Package Mode");
@@ -82,6 +88,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     else
     {
         lstrcpyW(szTitle, buf);
+        Package CurrentPackage = Package::Current();
+        winrt::hstring displayName = CurrentPackage.DisplayName();
+        OutputDebugStringW(displayName.c_str());
+        for (const Package depPack : CurrentPackage.Dependencies())
+        {
+            OutputDebugStringW(depPack.DisplayName().c_str());
+        }
     }
 
     // Initialize global strings
